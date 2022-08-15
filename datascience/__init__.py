@@ -3,7 +3,7 @@ from .cleaning import *
 from .exploratory import *
 from .model import *
 
-def a():
+# def a():
 
-    hey = exploratory.hello()
-    print(hey)
+#     hey = exploratory.hello()
+#     print(hey)
