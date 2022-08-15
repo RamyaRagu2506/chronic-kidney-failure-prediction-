@@ -1,3 +1,4 @@
-from datascience import cleaning, exploratory, feature_eng, model
+from datascience import cleaning, exploratory, feature_eng, model, read_data
 
-print(exploratory.hello())
+stroke_df = read_data.read_csv("Data\strokedata_raw.csv")
+print(stroke_df.head())
