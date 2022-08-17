@@ -3,10 +3,10 @@ import pandas as pd
 import numpy as np 
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder 
+from sklearn.preprocessing import LabelEncoder,Normalizer
 from sklearn.model_selection import cross_val_score,KFold
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics 
 from sklearn.metrics import confusion_matrix, classification_report
 
@@ -51,7 +51,7 @@ for col in obj_list:
 #print(stroke.info())
 stroke = stroke.drop('id',axis = 1)
 #print(stroke.head())
-plt.figure(figsize=(16,6))
+#plt.figure(figsize=(16,6))
 
 # heat map 
 x = stroke.corr()
@@ -65,19 +65,24 @@ label = stroke.stroke.values
 # split and train daataset
 X_train, X_test, y_train, y_test = train_test_split(key_features, label, test_size=0.2, shuffle=True)
 
-# fit in model 
-cv = KFold(n_splits=7,shuffle=True) #cross validation with kfold method , split and shuffle data 
-logreg = LogisticRegression()
-model = logreg.fit(X_train,y_train)
+#normalisation 
+nd = Normalizer()
+X_train=nd.fit_transform(X_train)
+X_test=nd.transform(X_test)
 
+# fit in model 
+cv = KFold(n_splits=10,shuffle=True,random_state=1) #cross validation with kfold method , split and shuffle data 
+rfc= RandomForestClassifier(random_state=2022)
+model = rfc.fit(X_train,y_train)
+# hyper parameter tuning 
 #predict model 
-y_pred = logreg.predict(X_test)
+y_pred = rfc.predict(X_test)
 
 #confusion matrix 
 conf = confusion_matrix(y_test, y_pred)
 cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = conf, display_labels = [False, True])
-# cm_display.plot()
-# plt.show()
+cm_display.plot()
+plt.show()
 
 # evaluate model
 scores = cross_val_score(model, X_train, y_train, scoring='accuracy', cv=cv, n_jobs=-1)
