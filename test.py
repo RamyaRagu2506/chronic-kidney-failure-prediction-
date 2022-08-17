@@ -3,6 +3,12 @@ import pandas as pd
 import numpy as np 
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder 
+from sklearn.model_selection import cross_val_score,KFold
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics 
+from sklearn.metrics import confusion_matrix, classification_report
 
 
 # read file 
@@ -33,10 +39,48 @@ check = stroke.bmi.isnull().sum()
 #latest data 
 # print(stroke.head())
 t=stroke.groupby(['smoking_status','work_type'])
-print(t.sum())
+#print(t.sum())
 
+# string to object 
+obj_list= [a for a in stroke.columns if stroke[a].dtype == object ]
+num_list = [a for a in stroke.columns if stroke[a].dtype != object ]
+
+le= LabelEncoder()
+for col in obj_list:
+  stroke[col] = le.fit_transform(stroke[col])
+#print(stroke.info())
+stroke = stroke.drop('id',axis = 1)
+#print(stroke.head())
+plt.figure(figsize=(16,6))
 
 # heat map 
-# x = sns.heatmap(stroke)
+x = stroke.corr()
+# sns.heatmap(x,vmin=-1,vmax=1,annot=True)
 # plt.show()
 
+# age ,hypertension, heart_disease,avg_glucose_level - key features 
+key_features = stroke[['age','hypertension','heart_disease','avg_glucose_level']]
+label = stroke.stroke.values
+
+# split and train daataset
+X_train, X_test, y_train, y_test = train_test_split(key_features, label, test_size=0.2, shuffle=True)
+
+# fit in model 
+cv = KFold(n_splits=7,shuffle=True) #cross validation with kfold method , split and shuffle data 
+logreg = LogisticRegression()
+model = logreg.fit(X_train,y_train)
+
+#predict model 
+y_pred = logreg.predict(X_test)
+
+#confusion matrix 
+conf = confusion_matrix(y_test, y_pred)
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = conf, display_labels = [False, True])
+# cm_display.plot()
+# plt.show()
+
+# evaluate model
+scores = cross_val_score(model, X_train, y_train, scoring='accuracy', cv=cv, n_jobs=-1)
+
+# report performance
+print('mean of scores:',np.mean(scores))
