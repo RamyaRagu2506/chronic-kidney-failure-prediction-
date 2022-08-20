@@ -74,7 +74,11 @@ X_test=nd.transform(X_test)
 cv = KFold(n_splits=10,shuffle=True,random_state=1) #cross validation with kfold method , split and shuffle data 
 rfc= RandomForestClassifier(random_state=2022)
 model = rfc.fit(X_train,y_train)
+
 # hyper parameter tuning 
+
+
+
 #predict model 
 y_pred = rfc.predict(X_test)
 
